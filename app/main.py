@@ -9,8 +9,13 @@ app = FastAPI(
     version="1.0.0",
 )
 
-os.makedirs("uploads/properties", exist_ok=True)
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+try:
+    os.makedirs("uploads/properties", exist_ok=True)
+    app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+except OSError:
+    # Vercel has a read-only filesystem, so creating local uploads will fail.
+    # In production, Cloudinary handles images.
+    print("Running in read-only filesystem (Serverless). Local uploads disabled.")
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,6 +29,3 @@ from app.api.api import api_router
 
 app.include_router(api_router, prefix="/api")
 
-@app.get("/")
-def root():
-    return {"message": "Welcome to the Housing Agent API"}
