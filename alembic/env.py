@@ -20,6 +20,10 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 import os
 import sys
+from dotenv import load_dotenv
+
+# Load .env file
+load_dotenv()
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.db.database import Base
