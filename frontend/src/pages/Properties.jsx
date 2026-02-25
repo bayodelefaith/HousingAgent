@@ -137,7 +137,9 @@ export default function Properties() {
                                 <Link to={`/properties/${property.id}`} className="block relative h-56 bg-surface-200 overflow-hidden">
                                     {/* Property image */}
                                     <img
-                                        src={property.images && property.images.length > 0 ? `http://localhost:8000${property.images[0].file_path}` : "https://images.unsplash.com/photo-1560518883-ce09059ee212?w=800&q=80&auto=format&fit=crop"}
+                                        src={property.images && property.images.length > 0
+                                            ? (property.images[0].file_path.startsWith('http') ? property.images[0].file_path : `http://localhost:8000${property.images[0].file_path}`)
+                                            : "https://images.unsplash.com/photo-1560518883-ce09059ee212?w=800&q=80&auto=format&fit=crop"}
                                         alt={property.title}
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     />

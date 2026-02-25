@@ -73,7 +73,9 @@ export default function PropertyDetails() {
         <div className="bg-surface-50 min-h-[calc(100vh-4rem)] pb-20">
             <div className="bg-surface-900 h-96 w-full relative overflow-hidden">
                 <img
-                    src={property.images && property.images.length > 0 ? `http://localhost:8000${property.images[0].file_path}` : "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80"}
+                    src={property.images && property.images.length > 0
+                        ? (property.images[0].file_path.startsWith('http') ? property.images[0].file_path : `http://localhost:8000${property.images[0].file_path}`)
+                        : "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80"}
                     alt={property.title}
                     className="w-full h-full object-cover opacity-60"
                 />

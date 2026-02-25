@@ -2,6 +2,8 @@ from typing import Any, List, Optional
 import os
 import uuid
 import shutil
+import cloudinary
+import cloudinary.uploader
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
@@ -12,6 +14,15 @@ from app.models.agent import Agent
 from app.models.property import Property, PropertyImage
 from app.schemas.property import PropertyCreate, PropertyResponse, PropertyImageResponse
 from app.api.deps import get_current_agent, get_current_user
+from app.core.config import settings
+
+# Configure cloudinary
+if settings.CLOUDINARY_CLOUD_NAME:
+    cloudinary.config(
+        cloud_name=settings.CLOUDINARY_CLOUD_NAME,
+        api_key=settings.CLOUDINARY_API_KEY,
+        api_secret=settings.CLOUDINARY_API_SECRET
+    )
 
 router = APIRouter()
 
@@ -36,19 +47,31 @@ def upload_property_images(
         if not file.filename:
             continue
             
-        # Generate unique filename
-        ext = os.path.splitext(file.filename)[1]
-        unique_filename = f"{uuid.uuid4()}{ext}"
-        filepath = os.path.join("uploads", "properties", unique_filename)
-        
-        # Save file to disk
-        with open(filepath, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        if settings.CLOUDINARY_CLOUD_NAME:
+            try:
+                result = cloudinary.uploader.upload(
+                    file.file, 
+                    folder=f"housing_agent/properties/{property_id}"
+                )
+                image_url = result.get('secure_url')
+            except Exception as e:
+                print(f"Cloudinary upload failed: {e}")
+                continue
+        else:
+            # Generate unique filename for local
+            ext = os.path.splitext(file.filename)[1]
+            unique_filename = f"{uuid.uuid4()}{ext}"
+            filepath = os.path.join("uploads", "properties", unique_filename)
+            
+            # Save file to disk
+            with open(filepath, "wb") as buffer:
+                shutil.copyfileobj(file.file, buffer)
+            image_url = f"/uploads/properties/{unique_filename}"
             
         # Store in db
         image_record = PropertyImage(
             property_id=property_id,
-            file_path=f"/uploads/properties/{unique_filename}"
+            file_path=image_url
         )
         db.add(image_record)
         uploaded_images.append(image_record)
