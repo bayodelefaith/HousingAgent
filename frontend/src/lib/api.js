@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: import.meta.env.PROD ? '/api' : 'http://localhost:8000/api',
+    baseURL: import.meta.env.PROD ? '/api' : 'https://housing-agent-ox2o.vercel.app/api',
 });
 
 api.interceptors.request.use(
