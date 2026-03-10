@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, BedDouble, Bath, User, ShieldCheck, Flag, Star, Image as ImageIcon } from 'lucide-react';
+import { MapPin, BedDouble, Bath, User, ShieldCheck, Flag, Star, Image as ImageIcon, Phone, Mail } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import api from '../lib/api';
@@ -18,6 +18,9 @@ export default function PropertyDetails() {
     // Gallery State
     const [showGallery, setShowGallery] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    // Contact State
+    const [showContact, setShowContact] = useState(false);
 
     useEffect(() => {
         const fetchProperty = async () => {
@@ -97,53 +100,58 @@ export default function PropertyDetails() {
                     </div>
                 </div>
 
-                {/* Hero Images Desktop Grid */}
-                <div className="relative rounded-2xl overflow-hidden h-[400px] sm:h-[500px] grid grid-cols-1 md:grid-cols-4 gap-2 bg-surface-200">
-                    <div
-                        className="md:col-span-2 h-full cursor-pointer relative group"
-                        onClick={() => { setShowGallery(true); setCurrentImageIndex(0); }}
-                    >
-                        <img
-                            src={getImageUrl(hasImages ? images[0]?.file_path : null)}
-                            alt="Main Property"
-                            className="w-full h-full object-cover transition duration-300 group-hover:brightness-90"
+                {/* Hero Image Carousel */}
+                <div className="relative rounded-2xl overflow-hidden h-[400px] sm:h-[500px] bg-surface-200 group">
+                    <AnimatePresence mode="wait">
+                        <motion.img
+                            key={currentImageIndex}
+                            initial={{ opacity: 0.5 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0.5 }}
+                            transition={{ duration: 0.3 }}
+                            src={getImageUrl(hasImages ? images[currentImageIndex]?.file_path : null)}
+                            alt={`Property view ${currentImageIndex + 1}`}
+                            className="w-full h-full object-contain bg-surface-900 cursor-pointer"
+                            onClick={() => setShowGallery(true)}
                         />
-                    </div>
+                    </AnimatePresence>
 
-                    <div className="hidden md:grid col-span-2 grid-cols-2 grid-rows-2 gap-2 h-full">
-                        {[1, 2, 3, 4].map((idx) => {
-                            const img = images[idx];
-                            return (
-                                <div
+                    {images.length > 1 && (
+                        <>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => prev === 0 ? images.length - 1 : prev - 1); }}
+                                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-surface-900 p-2 sm:p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-md backdrop-blur-sm"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
+                            </button>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1); }}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-surface-900 p-2 sm:p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-md backdrop-blur-sm"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+                            </button>
+                        </>
+                    )}
+
+                    {/* Carousel Indicators */}
+                    {images.length > 1 && (
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10 bg-black/20 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                            {images.map((_, idx) => (
+                                <button
                                     key={idx}
-                                    className="h-full relative cursor-pointer group overflow-hidden"
-                                    onClick={() => { if (img) { setShowGallery(true); setCurrentImageIndex(idx); } }}
-                                >
-                                    {img ? (
-                                        <img
-                                            src={getImageUrl(img.file_path)}
-                                            alt={`Property view ${idx + 1}`}
-                                            className="w-full h-full object-cover transition duration-300 group-hover:brightness-90 opacity-90"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full bg-surface-100"></div>
-                                    )}
-                                    {idx === 4 && images.length > 5 && (
-                                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-semibold text-xl group-hover:bg-black/60 transition">
-                                            +{images.length - 5}
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
+                                    onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(idx); }}
+                                    className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all ${currentImageIndex === idx ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/80'}`}
+                                />
+                            ))}
+                        </div>
+                    )}
 
                     <button
-                        onClick={() => { setShowGallery(true); setCurrentImageIndex(0); }}
-                        className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm text-surface-900 px-4 py-2 rounded-lg font-medium shadow-sm border border-surface-200 hover:bg-white flex items-center gap-2 transition"
+                        onClick={() => setShowGallery(true)}
+                        className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-surface-900 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-sm sm:text-base font-medium shadow-sm border border-surface-200 hover:bg-white flex items-center gap-2 transition"
                     >
                         <ImageIcon className="h-4 w-4" />
-                        Show all photos
+                        {images.length} Photos
                     </button>
                 </div>
             </div>
@@ -226,11 +234,13 @@ export default function PropertyDetails() {
                             <h3 className="font-bold text-surface-900 mb-6 text-lg">Listed By</h3>
 
                             <div className="flex items-center gap-4 border-b border-surface-100 pb-6 mb-6">
-                                <div className="h-16 w-16 bg-surface-100 rounded-full flex items-center justify-center text-surface-400">
+                                <div className="h-16 w-16 bg-surface-100 rounded-full flex items-center justify-center text-surface-400 overflow-hidden shrink-0">
                                     <User className="h-8 w-8" />
                                 </div>
                                 <div>
-                                    <p className="font-semibold text-surface-900 text-lg">Agent ID: {property.agent_id}</p>
+                                    <p className="font-semibold text-surface-900 text-lg">
+                                        {property.agent?.first_name ? `${property.agent.first_name} ${property.agent.last_name}` : `Agent ID: ${property.agent_id}`}
+                                    </p>
                                     <div className="flex items-center gap-1 text-green-600 text-sm mt-1 font-medium shadow-sm bg-green-50 px-2 py-0.5 rounded-full inline-flex">
                                         <ShieldCheck className="h-4 w-4" />
                                         Strictly Verified
@@ -256,9 +266,49 @@ export default function PropertyDetails() {
                                     Ratings help prevent scams and maintain premium service
                                 </p>
 
-                                <button className="w-full bg-primary-600 text-white font-semibold py-3 rounded-xl mt-6 hover:bg-primary-700 transition shadow-lg shadow-primary-600/20">
-                                    Contact Agent
-                                </button>
+                                {showContact ? (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="space-y-3 mt-6"
+                                    >
+                                        {property.agent?.phone_number && (
+                                            <a href={`tel:${property.agent.phone_number}`} className="flex items-center gap-3 p-3 bg-surface-50 hover:bg-surface-100 border border-surface-200 rounded-xl transition cursor-pointer group">
+                                                <div className="bg-primary-100 p-2 rounded-full text-primary-700 group-hover:bg-primary-200 transition">
+                                                    <Phone className="h-5 w-5" />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs font-semibold text-surface-500 uppercase tracking-wider">Phone</span>
+                                                    <span className="text-surface-900 font-bold">{property.agent.phone_number}</span>
+                                                </div>
+                                            </a>
+                                        )}
+                                        {property.agent?.user?.email && (
+                                            <a href={`mailto:${property.agent.user.email}`} className="flex items-center gap-3 p-3 bg-surface-50 hover:bg-surface-100 border border-surface-200 rounded-xl transition cursor-pointer group">
+                                                <div className="bg-primary-100 p-2 rounded-full text-primary-700 group-hover:bg-primary-200 transition">
+                                                    <Mail className="h-5 w-5" />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs font-semibold text-surface-500 uppercase tracking-wider">Email</span>
+                                                    <span className="text-surface-900 font-bold max-w-[180px] truncate">{property.agent.user.email}</span>
+                                                </div>
+                                            </a>
+                                        )}
+                                        {(!property.agent?.phone_number && !property.agent?.user?.email) && (
+                                            <div className="text-center p-4 text-surface-500 bg-surface-50 rounded-xl border border-surface-200">
+                                                No contact info available for this agent.
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                ) : (
+                                    <button
+                                        onClick={() => setShowContact(true)}
+                                        className="w-full bg-primary-600 text-white font-semibold flex justify-center items-center gap-2 py-3 rounded-xl mt-6 hover:bg-primary-700 transition shadow-lg shadow-primary-600/20"
+                                    >
+                                        <Phone className="h-5 w-5" />
+                                        Contact Agent
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
