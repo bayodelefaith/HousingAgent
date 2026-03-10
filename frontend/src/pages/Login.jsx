@@ -3,6 +3,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, Home } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../lib/api';
+import logo from '../assets/luxehousing-logo.svg';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -13,7 +14,7 @@ export default function Login() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const from = location.state?.from?.pathname || '/dashboard';
+    const from = location.state?.from?.pathname || '/properties';
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -50,8 +51,8 @@ export default function Login() {
             <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-surface-200">
                 <div className="p-8">
                     <div className="mb-8 text-center">
-                        <Link to="/" className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 text-primary-600">
-                            <Home className="h-6 w-6" />
+                        <Link to="/" className="mx-auto mb-4 block">
+                            <img src={logo} alt="LuxeHousing Logo" className="mx-auto h-16 w-auto object-contain" />
                         </Link>
                         <h1 className="text-2xl font-bold tracking-tight text-surface-900">Welcome Back</h1>
                         <p className="mt-2 text-sm text-surface-500">Sign in to your LuxeHousing account</p>

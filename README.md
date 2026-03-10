@@ -29,7 +29,7 @@ A full-stack, comprehensive web platform for real estate agents to list properti
 * **Python 3.10+**
 * **FastAPI:** High-performance async web framework
 * **SQLAlchemy & Alembic:** ORM and database migration management
-* **SQLite:** Default lightweight database (easily swapable to PostgreSQL/MySQL)
+* **PostgreSQL:** PostgreSQL using SupaBase
 * **Passlib (Bcrypt) & Python-Jose:** Secure password hashing and JWT token generation
 * **Pydantic:** Type validation and settings management
 

@@ -25,7 +25,7 @@ export default function ProtectedRoute({ children, adminOnly = false, agentOnly 
         return <Navigate to="/dashboard" replace />;
     }
 
-    if (agentOnly && !user.is_agent) {
+    if (agentOnly && (!user.is_agent || !user.is_verified)) {
         return <Navigate to="/dashboard" replace />;
     }
 

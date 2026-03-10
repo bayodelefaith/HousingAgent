@@ -16,6 +16,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AgentDashboard from './pages/AgentDashboard';
 import Properties from './pages/Properties';
 import PropertyDetails from './pages/PropertyDetails';
+import TermsAndConditions from './pages/TermsAndConditions';
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
             <Route index element={<Home />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
+            <Route path="terms-and-conditions" element={<TermsAndConditions />} />
 
             {/* Protected Routes */}
             <Route path="dashboard" element={

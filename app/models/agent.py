@@ -7,7 +7,10 @@ class Agent(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), unique=True)
+    first_name = Column(String, default="")
+    last_name = Column(String, default="")
     nin = Column(String(11), unique=True, index=True, nullable=True)
+    nin_image = Column(String, default="")
     phone_number = Column(String, unique=True, index=True, nullable=True)
     
     # 0: Unverified, 1: Phone Verified, 2: NIN Verified

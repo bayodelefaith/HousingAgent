@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, User as UserIcon, ArrowRight, KeyRound } from 'lucide-react';
 import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
+import logo from '../assets/luxehousing-logo.svg';
 
 export default function Register() {
     const [email, setEmail] = useState('');
@@ -45,7 +46,7 @@ export default function Register() {
             });
 
             login(token, userRes.data);
-            navigate('/dashboard');
+            navigate('/properties');
         } catch (err) {
             setError(err.response?.data?.detail || 'Failed to register account.');
         } finally {
@@ -58,6 +59,9 @@ export default function Register() {
             <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-surface-200">
                 <div className="p-8">
                     <div className="mb-8 text-center">
+                        <Link to="/" className="mx-auto mb-4 block">
+                            <img src={logo} alt="LuxeHousing Logo" className="mx-auto h-16 w-auto object-contain" />
+                        </Link>
                         <h1 className="text-2xl font-bold tracking-tight text-surface-900">Create an Account</h1>
                         <p className="mt-2 text-sm text-surface-500">Join LuxeHousing for premium properties</p>
                     </div>

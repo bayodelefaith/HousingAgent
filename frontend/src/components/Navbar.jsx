@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Home, User, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import logo from '../assets/luxehousing-logo.svg';
 
 export default function Navbar() {
     const { user, isAdmin, isVerifiedAgent, logout } = useAuth();
@@ -15,16 +16,13 @@ export default function Navbar() {
         <nav className="sticky top-0 z-50 w-full border-b border-surface-200 bg-white/80 backdrop-blur-md">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex h-16 items-center justify-between">
-                    <Link to="/" className="flex items-center gap-2 text-primary-600">
-                        <Home className="h-6 w-6" />
-                        <span className="text-xl font-bold tracking-tight text-surface-900">
-                            Luxe<span className="text-primary-600">Housing</span>
-                        </span>
+                    <Link to="/" className="flex items-center gap-2">
+                        <img src={logo} alt="LuxeHousing Logo" className="h-10 w-auto object-contain" />
                     </Link>
 
                     <div className="flex items-center gap-4">
                         <Link to="/properties" className="text-sm font-medium text-surface-600 hover:text-primary-600 transition-colors">
-                            Browse
+                            Explore Properties
                         </Link>
 
                         {user ? (

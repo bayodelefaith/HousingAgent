@@ -8,13 +8,16 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
-class UserResponse(UserBase):
+class UserResponse(BaseModel):
     id: int
+    email: str
     is_active: bool
     is_agent: bool
     is_admin: bool
+    is_verified: bool = False
     created_at: datetime
-    
+    has_agent_profile: bool = False
+
     class Config:
         from_attributes = True
 

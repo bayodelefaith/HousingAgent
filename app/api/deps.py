@@ -36,7 +36,8 @@ def get_current_active_user(current_user: User = Depends(get_current_user)) -> U
     return current_user
 
 def get_current_agent(current_user: User = Depends(get_current_active_user)) -> User:
-    if not current_user.is_agent:
+    # A user acts as an agent if is_agent is True OR if they have an unverified agent profile
+    if not current_user.is_agent and not current_user.agent_profile:
         raise HTTPException(status_code=403, detail="Not enough privileges")
     return current_user
 

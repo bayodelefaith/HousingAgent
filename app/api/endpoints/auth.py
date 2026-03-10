@@ -49,4 +49,17 @@ def login_access_token(
 
 @router.get("/me", response_model=UserResponse)
 def read_users_me(current_user: User = Depends(get_current_user)) -> Any:
-    return current_user
+    is_verified = False
+    if current_user.agent_profile:
+        is_verified = current_user.agent_profile.is_verified
+    
+    return {
+        "id": current_user.id,
+        "email": current_user.email,
+        "is_active": current_user.is_active,
+        "is_agent": current_user.is_agent,
+        "is_admin": current_user.is_admin,
+        "is_verified": is_verified,
+        "created_at": current_user.created_at,
+        "has_agent_profile": current_user.agent_profile is not None
+    }

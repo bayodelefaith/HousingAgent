@@ -15,6 +15,16 @@ class PropertyBase(BaseModel):
 class PropertyCreate(PropertyBase):
     pass
 
+class PropertyUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[float] = None
+    location: Optional[str] = None
+    property_type: Optional[str] = None
+    bedrooms: Optional[int] = None
+    bathrooms: Optional[int] = None
+    is_available: Optional[bool] = None
+
 class PropertyImageResponse(BaseModel):
     id: int
     property_id: int

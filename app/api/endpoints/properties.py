@@ -12,7 +12,7 @@ from app.db.database import get_db
 from app.models.user import User
 from app.models.agent import Agent
 from app.models.property import Property, PropertyImage
-from app.schemas.property import PropertyCreate, PropertyResponse, PropertyImageResponse
+from app.schemas.property import PropertyCreate, PropertyUpdate, PropertyResponse, PropertyImageResponse
 from app.api.deps import get_current_agent, get_current_user
 from app.core.config import settings
 
@@ -82,7 +82,7 @@ def upload_property_images(
         
     return uploaded_images
 
-@router.post("/", response_model=PropertyResponse)
+@router.post("", response_model=PropertyResponse)
 def create_property(
     property_in: PropertyCreate,
     db: Session = Depends(get_db),
@@ -90,10 +90,10 @@ def create_property(
 ) -> Any:
     # Ensure agent is level 2 (Fully Verified)
     agent = db.query(Agent).filter(Agent.user_id == current_user.id).first()
-    if not agent:
+    if not agent or not agent.is_verified:
         raise HTTPException(
             status_code=403, 
-            detail="You must be an active agent to post properties."
+            detail="You must be a fully verified agent to post properties."
         )
         
     property_obj = Property(
@@ -105,7 +105,7 @@ def create_property(
     db.refresh(property_obj)
     return property_obj
 
-@router.get("/", response_model=List[PropertyResponse])
+@router.get("", response_model=List[PropertyResponse])
 def list_properties(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -132,6 +132,18 @@ def list_properties(
     properties = query.offset(skip).limit(limit).all()
     return properties
 
+@router.get("/me/listings", response_model=List[PropertyResponse])
+def get_my_properties(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_agent)
+) -> Any:
+    agent = db.query(Agent).filter(Agent.user_id == current_user.id).first()
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent profile not found")
+        
+    properties = db.query(Property).filter(Property.agent_id == agent.id).order_by(Property.created_at.desc()).all()
+    return properties
+
 @router.get("/{property_id}", response_model=PropertyResponse)
 def get_property(
     property_id: int,
@@ -141,3 +153,45 @@ def get_property(
     if not property_obj:
         raise HTTPException(status_code=404, detail="Property not found")
     return property_obj
+
+@router.put("/{property_id}", response_model=PropertyResponse)
+def update_property(
+    property_id: int,
+    property_in: PropertyUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_agent)
+) -> Any:
+    property_obj = db.query(Property).filter(Property.id == property_id).first()
+    if not property_obj:
+        raise HTTPException(status_code=404, detail="Property not found")
+        
+    agent = db.query(Agent).filter(Agent.user_id == current_user.id).first()
+    if not agent or property_obj.agent_id != agent.id:
+        raise HTTPException(status_code=403, detail="You can only edit your own properties")
+        
+    update_data = property_in.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(property_obj, field, value)
+        
+    db.add(property_obj)
+    db.commit()
+    db.refresh(property_obj)
+    return property_obj
+
+@router.delete("/{property_id}")
+def delete_property(
+    property_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_agent)
+) -> Any:
+    property_obj = db.query(Property).filter(Property.id == property_id).first()
+    if not property_obj:
+        raise HTTPException(status_code=404, detail="Property not found")
+        
+    agent = db.query(Agent).filter(Agent.user_id == current_user.id).first()
+    if not agent or property_obj.agent_id != agent.id:
+        raise HTTPException(status_code=403, detail="You can only delete your own properties")
+        
+    db.delete(property_obj)
+    db.commit()
+    return {"detail": "Property successfully deleted"}

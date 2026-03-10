@@ -1,5 +1,7 @@
 from typing import Any, List
-from fastapi import APIRouter, Depends, HTTPException, status
+import cloudinary
+import cloudinary.uploader
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
@@ -9,22 +11,44 @@ from app.models.verification import VerificationRequest
 from app.schemas.agent import AgentResponse, AgentCreate
 from app.schemas.verification import VerificationRequestCreate, VerificationRequestResponse
 from app.api.deps import get_current_user, get_current_active_user, get_current_agent
+from app.core.config import settings
+
+# Configure cloudinary
+if settings.CLOUDINARY_CLOUD_NAME:
+    cloudinary.config(
+        cloud_name=settings.CLOUDINARY_CLOUD_NAME,
+        api_key=settings.CLOUDINARY_API_KEY,
+        api_secret=settings.CLOUDINARY_API_SECRET
+    )
 
 router = APIRouter()
 
 @router.post("/register", response_model=AgentResponse)
-def register_as_agent(db: Session = Depends(get_db), current_user: User = Depends(get_current_active_user)) -> Any:
+def register_as_agent(agent_in: AgentCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_active_user)) -> Any:
     # Check if already an agent
     if current_user.is_agent:
         raise HTTPException(status_code=400, detail="User is already an agent")
     
-    agent = Agent(user_id=current_user.id)
+    agent = Agent(
+        user_id=current_user.id,
+        first_name=agent_in.first_name,
+        last_name=agent_in.last_name,
+        nin=agent_in.nin,
+        nin_image=agent_in.nin_image,
+        phone_number=agent_in.phone_number
+    )
     db.add(agent)
     
-    # Update user role
-    current_user.is_agent = True
-    db.add(current_user)
+    db.flush() # Need agent.id for verification request
     
+    req = VerificationRequest(
+        agent_id=agent.id,
+        nin_submitted=agent_in.nin,
+        phone_submitted=agent_in.phone_number,
+        status="PENDING"
+    )
+    db.add(req)
+
     db.commit()
     db.refresh(agent)
     return agent
@@ -58,35 +82,46 @@ def submit_verification(
     db.refresh(req)
     return req
 
-@router.put("/verify/approve/{request_id}", response_model=VerificationRequestResponse)
-def approve_verification(
-    request_id: int,
-    db: Session = Depends(get_db)
-    # Admin dependency could be added here in a real scenario
+
+
+@router.get("/me", response_model=AgentResponse)
+def get_my_agent_profile(db: Session = Depends(get_db), current_user: User = Depends(get_current_agent)) -> Any:
+    agent = db.query(Agent).filter(Agent.user_id == current_user.id).first()
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent profile not found")
+    return agent
+
+@router.post("/upload-nin-image", response_model=AgentResponse)
+def upload_nin_image(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_agent)
 ) -> Any:
-    req = db.query(VerificationRequest).filter(VerificationRequest.id == request_id).first()
-    if not req:
-        raise HTTPException(status_code=404, detail="Request not found")
-    if req.status != "PENDING":
-        raise HTTPException(status_code=400, detail="Request is not pending")
-        
-    req.status = "APPROVED"
-    db.add(req)
+    """Upload NIN (National Identification Number) image to Cloudinary"""
+    agent = db.query(Agent).filter(Agent.user_id == current_user.id).first()
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent profile not found")
     
-    # Upgrade agent level
-    agent = db.query(Agent).filter(Agent.id == req.agent_id).first()
-    if agent:
-        if req.nin_submitted:
-            agent.nin = req.nin_submitted
-            agent.verification_level = 2
-            agent.is_verified = True
-        elif req.phone_submitted:
-            agent.phone_number = req.phone_submitted
-            if agent.verification_level < 1:
-                agent.verification_level = 1
-                
-        db.add(agent)
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file provided")
+    
+    try:
+        if settings.CLOUDINARY_CLOUD_NAME:
+            # Upload to Cloudinary in NIN folder
+            result = cloudinary.uploader.upload(
+                file.file,
+                folder="housing_agent/NIN",
+                resource_type="auto"
+            )
+            image_url = result.get('secure_url')
+        else:
+            raise HTTPException(status_code=500, detail="Cloudinary is not configured")
         
-    db.commit()
-    db.refresh(req)
-    return req
+        # Update agent's nin_image field
+        agent.nin_image = image_url
+        db.commit()
+        db.refresh(agent)
+        
+        return agent
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to upload NIN image: {str(e)}")
