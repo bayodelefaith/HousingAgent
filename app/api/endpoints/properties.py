@@ -195,3 +195,33 @@ def delete_property(
     db.delete(property_obj)
     db.commit()
     return {"detail": "Property successfully deleted"}
+
+@router.delete("/{property_id}/images/{image_id}")
+def delete_property_image(
+    property_id: int,
+    image_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_agent)
+) -> Any:
+    property_obj = db.query(Property).filter(Property.id == property_id).first()
+    if not property_obj:
+        raise HTTPException(status_code=404, detail="Property not found")
+        
+    agent = db.query(Agent).filter(Agent.user_id == current_user.id).first()
+    if not agent or property_obj.agent_id != agent.id:
+        raise HTTPException(status_code=403, detail="You can only delete images for your own properties")
+        
+    image_obj = db.query(PropertyImage).filter(
+        PropertyImage.id == image_id, 
+        PropertyImage.property_id == property_id
+    ).first()
+    
+    if not image_obj:
+        raise HTTPException(status_code=404, detail="Image not found")
+        
+    # In a full implementation, you would also delete the file from Cloudinary 
+    # or the local filesystem here using image_obj.file_path
+    
+    db.delete(image_obj)
+    db.commit()
+    return {"detail": "Image successfully deleted"}

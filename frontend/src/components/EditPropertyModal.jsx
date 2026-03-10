@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Home, Banknote, MapPin, Grid, BedDouble, Bath, X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Home, Banknote, MapPin, Grid, BedDouble, Bath, X, Image as ImageIcon, Trash2 } from 'lucide-react';
 import api from '../lib/api';
 
 export default function EditPropertyModal({ property, onClose, onSuccess }) {
@@ -13,8 +13,11 @@ export default function EditPropertyModal({ property, onClose, onSuccess }) {
         bathrooms: '',
         is_available: true
     });
+    const [existingImages, setExistingImages] = useState([]);
+    const [newImages, setNewImages] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
         if (property) {
@@ -28,6 +31,7 @@ export default function EditPropertyModal({ property, onClose, onSuccess }) {
                 bathrooms: property.bathrooms,
                 is_available: property.is_available
             });
+            setExistingImages(property.images || []);
         }
     }, [property]);
 
@@ -39,44 +43,115 @@ export default function EditPropertyModal({ property, onClose, onSuccess }) {
         });
     };
 
+    const handleNewImageChange = (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const addedFiles = Array.from(e.target.files);
+            setNewImages(prev => [...prev, ...addedFiles]);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        }
+    };
+
+    const removeNewImage = (indexToRemove) => {
+        setNewImages(newImages.filter((_, index) => index !== indexToRemove));
+    };
+
+    const deleteExistingImage = async (imageId) => {
+        if (!window.confirm("Are you sure you want to delete this image?")) return;
+
+        try {
+            await api.delete(`/properties/${property.id}/images/${imageId}`);
+            setExistingImages(existingImages.filter(img => img.id !== imageId));
+        } catch (err) {
+            console.error("Failed to delete image:", err);
+            alert("Failed to delete image.");
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
         try {
+            // Update Details
             await api.put(`/properties/${property.id}`, {
                 ...formData,
                 price: parseFloat(formData.price),
                 bedrooms: parseInt(formData.bedrooms, 10),
                 bathrooms: parseInt(formData.bathrooms, 10),
             });
+
+            // Upload New Images
+            if (newImages.length > 0) {
+                const imgData = new FormData();
+                newImages.forEach(img => {
+                    imgData.append('files', img);
+                });
+                await api.post(`/properties/${property.id}/images`, imgData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+            }
+
             onSuccess();
         } catch (err) {
             setError(err.response?.data?.detail || 'Failed to update property.');
-        } finally {
-            setLoading(false);
+            setLoading(false); // only stop loading on error, on success parent unmounts
         }
     };
 
+    // Helper for resolving image urls
+    const getImageUrl = (path) => {
+        if (path.startsWith('http')) return path;
+        return `http://localhost:8000${path}`;
+    };
+
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                <div className="sticky top-0 bg-white border-b border-surface-200 px-6 py-4 flex items-center justify-between z-10">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+                <div className="bg-white border-b border-surface-200 px-6 py-4 flex items-center justify-between z-10 shrink-0">
                     <h2 className="text-xl font-bold text-surface-900">Edit Property</h2>
                     <button onClick={onClose} className="p-2 hover:bg-surface-100 rounded-full text-surface-500 transition">
                         <X className="h-5 w-5" />
                     </button>
                 </div>
 
-                <div className="p-6">
+                <div className="p-6 overflow-y-auto">
                     {error && (
                         <div className="mb-6 rounded-lg bg-red-50 p-3 text-sm text-red-600 border border-red-200">
                             {error}
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        {/* Current Images Section */}
+                        {existingImages.length > 0 && (
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-surface-700 mb-2">Current Images</label>
+                                <div className="grid grid-cols-4 gap-3">
+                                    {existingImages.map((img) => (
+                                        <div key={img.id} className="relative aspect-square rounded-lg border border-surface-200 overflow-hidden group">
+                                            <img
+                                                src={getImageUrl(img.file_path)}
+                                                alt="Property"
+                                                className="w-full h-full object-cover"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => deleteExistingImage(img.id)}
+                                                className="absolute inset-x-0 bottom-0 bg-red-600/90 text-white p-1.5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 text-xs font-medium"
+                                                title="Delete this image"
+                                            >
+                                                <Trash2 className="h-3 w-3" /> Delete
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Property Details */}
                         <div>
                             <label className="block text-sm font-medium text-surface-700 mb-1">Title</label>
                             <div className="relative">
@@ -189,6 +264,43 @@ export default function EditPropertyModal({ property, onClose, onSuccess }) {
                             />
                         </div>
 
+                        {/* Upload New Images Section */}
+                        <div className="pt-2 border-t border-surface-100 mt-4">
+                            <label className="block text-sm font-medium text-surface-700 mb-1">Add More Images</label>
+                            <div className="relative">
+                                <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-400 h-5 w-5" />
+                                <input
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    ref={fileInputRef}
+                                    onChange={handleNewImageChange}
+                                    className="w-full pl-10 pr-4 py-2 rounded-lg border border-surface-300 focus:ring-2 focus:ring-primary-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+                                />
+                            </div>
+
+                            {newImages.length > 0 && (
+                                <div className="mt-3 grid grid-cols-4 gap-2">
+                                    {newImages.map((img, index) => (
+                                        <div key={index} className="relative aspect-square rounded-lg border border-surface-200 border-dashed bg-surface-50 overflow-hidden group">
+                                            <img
+                                                src={URL.createObjectURL(img)}
+                                                alt={`New Preview ${index}`}
+                                                className="w-full h-full object-cover opacity-80"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeNewImage(index)}
+                                                className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-600"
+                                            >
+                                                <X className="h-3 w-3" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
                         <div className="flex items-center mt-4">
                             <input
                                 id="is_available"
@@ -203,7 +315,8 @@ export default function EditPropertyModal({ property, onClose, onSuccess }) {
                             </label>
                         </div>
 
-                        <div className="pt-4 border-t border-surface-200 flex justify-end gap-3">
+                        {/* Modal Footer actions sticky bottom equivalent inside flex col */}
+                        <div className="pt-6 mt-4 border-t border-surface-200 flex justify-end gap-3 sticky bottom-0 bg-white shadow-[0_-10px_15px_-10px_rgba(0,0,0,0.1)]">
                             <button
                                 type="button"
                                 onClick={onClose}

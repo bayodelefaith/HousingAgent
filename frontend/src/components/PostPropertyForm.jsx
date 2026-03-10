@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Home, Banknote, MapPin, Grid, BedDouble, Bath, Image as ImageIcon } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Home, Banknote, MapPin, Grid, BedDouble, Bath, Image as ImageIcon, X } from 'lucide-react';
 import api from '../lib/api';
 
 export default function PostPropertyForm({ onSuccess }) {
@@ -15,15 +15,26 @@ export default function PostPropertyForm({ onSuccess }) {
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const fileInputRef = useRef(null);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleImageChange = (e) => {
-        if (e.target.files) {
-            setImages(Array.from(e.target.files));
+        if (e.target.files && e.target.files.length > 0) {
+            const newFiles = Array.from(e.target.files);
+            // Append new files to existing ones (optional max limit could go here)
+            setImages(prev => [...prev, ...newFiles]);
+            // Reset input so the same files can be re-selected if removed
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
         }
+    };
+
+    const removeImage = (indexToRemove) => {
+        setImages(images.filter((_, index) => index !== indexToRemove));
     };
 
     const handleSubmit = async (e) => {
@@ -204,10 +215,32 @@ export default function PostPropertyForm({ onSuccess }) {
                             type="file"
                             multiple
                             accept="image/*"
+                            ref={fileInputRef}
                             onChange={handleImageChange}
                             className="w-full pl-10 pr-4 py-2 rounded-lg border border-surface-300 focus:ring-2 focus:ring-primary-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
                         />
                     </div>
+
+                    {images.length > 0 && (
+                        <div className="mt-3 grid grid-cols-4 gap-2">
+                            {images.map((img, index) => (
+                                <div key={index} className="relative aspect-square rounded-lg border border-surface-200 overflow-hidden group">
+                                    <img
+                                        src={URL.createObjectURL(img)}
+                                        alt={`Preview ${index}`}
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => removeImage(index)}
+                                        className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-600"
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 <button
