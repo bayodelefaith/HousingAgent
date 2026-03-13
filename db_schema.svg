@@ -1,0 +1,87 @@
+<svg viewBox="0 0 900 600" width="100%" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="900" height="600" fill="#f8fafc" rx="10"/>
+
+  <!-- Users Table -->
+  <g transform="translate(50, 220)">
+    <rect width="180" height="150" fill="#fff" stroke="#cbd5e1" stroke-width="2" rx="6" />
+    <rect width="180" height="30" fill="#0f172a" rx="6" stroke="#0f172a" />
+    <text x="90" y="20" fill="white" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle">users</text>
+    <text x="10" y="50" font-family="Arial" font-size="12">PK: id</text>
+    <text x="10" y="70" font-family="Arial" font-size="12">email (unique)</text>
+    <text x="10" y="90" font-family="Arial" font-size="12">hashed_password</text>
+    <text x="10" y="110" font-family="Arial" font-size="12">is_active, is_agent</text>
+    <text x="10" y="130" font-family="Arial" font-size="12">is_admin</text>
+  </g>
+
+  <!-- Agents Table -->
+  <g transform="translate(350, 50)">
+    <rect width="180" height="180" fill="#fff" stroke="#cbd5e1" stroke-width="2" rx="6" />
+    <rect width="180" height="30" fill="#0369a1" rx="6" stroke="#0369a1" />
+    <text x="90" y="20" fill="white" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle">agents</text>
+    <text x="10" y="50" font-family="Arial" font-size="12">PK: id</text>
+    <text x="10" y="70" font-family="Arial" font-size="12">FK: user_id</text>
+    <text x="10" y="90" font-family="Arial" font-size="12">nin, phone_number</text>
+    <text x="10" y="110" font-family="Arial" font-size="12">first/last_name</text>
+    <text x="10" y="130" font-family="Arial" font-size="12">verification_level</text>
+    <text x="10" y="150" font-family="Arial" font-size="12">average_rating</text>
+  </g>
+
+  <!-- Properties Table -->
+  <g transform="translate(650, 50)">
+    <rect width="180" height="180" fill="#fff" stroke="#cbd5e1" stroke-width="2" rx="6" />
+    <rect width="180" height="30" fill="#047857" rx="6" stroke="#047857" />
+    <text x="90" y="20" fill="white" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle">properties</text>
+    <text x="10" y="50" font-family="Arial" font-size="12">PK: id</text>
+    <text x="10" y="70" font-family="Arial" font-size="12">FK: agent_id</text>
+    <text x="10" y="90" font-family="Arial" font-size="12">title, description</text>
+    <text x="10" y="110" font-family="Arial" font-size="12">price, location</text>
+    <text x="10" y="130" font-family="Arial" font-size="12">property_type</text>
+    <text x="10" y="150" font-family="Arial" font-size="12">beds, baths</text>
+  </g>
+
+  <!-- Verification Requests Table -->
+  <g transform="translate(350, 420)">
+    <rect width="180" height="120" fill="#fff" stroke="#cbd5e1" stroke-width="2" rx="6" />
+    <rect width="180" height="30" fill="#a21caf" rx="6" stroke="#a21caf" />
+    <text x="90" y="20" fill="white" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle">verification_requests</text>
+    <text x="10" y="50" font-family="Arial" font-size="12">PK: id</text>
+    <text x="10" y="70" font-family="Arial" font-size="12">FK: agent_id</text>
+    <text x="10" y="90" font-family="Arial" font-size="12">nin/phone_submitted</text>
+    <text x="10" y="110" font-family="Arial" font-size="12">status</text>
+  </g>
+
+  <!-- Property Images Table -->
+  <g transform="translate(650, 300)">
+    <rect width="180" height="100" fill="#fff" stroke="#cbd5e1" stroke-width="2" rx="6" />
+    <rect width="180" height="30" fill="#b45309" rx="6" stroke="#b45309" />
+    <text x="90" y="20" fill="white" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle">property_images</text>
+    <text x="10" y="50" font-family="Arial" font-size="12">PK: id</text>
+    <text x="10" y="70" font-family="Arial" font-size="12">FK: property_id</text>
+    <text x="10" y="90" font-family="Arial" font-size="12">file_path</text>
+  </g>
+
+  <!-- Reports / Ratings (Summarized) -->
+  <g transform="translate(350, 260)">
+    <rect width="180" height="120" fill="#fff" stroke="#cbd5e1" stroke-width="2" rx="6" />
+    <rect width="180" height="30" fill="#be123c" rx="6" stroke="#be123c" />
+    <text x="90" y="20" fill="white" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle">reports &amp; ratings</text>
+    <text x="10" y="50" font-family="Arial" font-size="12">PK: id</text>
+    <text x="10" y="70" font-family="Arial" font-size="12">FK: user_id, agent_id</text>
+    <text x="10" y="90" font-family="Arial" font-size="12">FK: property_id</text>
+    <text x="10" y="110" font-family="Arial" font-size="12">score, reason, status</text>
+  </g>
+
+  <!-- Connecting Lines -->
+  <!-- User -> Agent -->
+  <path d="M 230 250 L 350 180" stroke="#94a3b8" stroke-width="2" fill="none" />
+  <!-- User -> Reports -->
+  <path d="M 230 300 L 350 300" stroke="#94a3b8" stroke-width="2" fill="none" />
+  <!-- Agent -> Properties -->
+  <path d="M 530 140 L 650 140" stroke="#94a3b8" stroke-width="2" fill="none" />
+  <!-- Agent -> Verification -->
+  <path d="M 440 230 L 440 420" stroke="#94a3b8" stroke-width="2" fill="none" stroke-dasharray="4" />
+  <!-- Property -> Images -->
+  <path d="M 740 230 L 740 300" stroke="#94a3b8" stroke-width="2" fill="none" />
+
+</svg>

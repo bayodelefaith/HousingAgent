@@ -225,6 +225,28 @@ export default function PropertyDetails() {
                                     {property.description}
                                 </p>
                             </div>
+
+                            {property.reports && property.reports.length > 0 && user?.is_admin && (
+                                <div className="mt-8 pt-8 border-t border-surface-200">
+                                    <h3 className="text-xl font-bold text-red-600 mb-4 flex items-center gap-2">
+                                        <Flag className="h-5 w-5" />
+                                        Admin View: Active Reports on Listing ({property.reports.length})
+                                    </h3>
+                                    <div className="space-y-4">
+                                        {property.reports.map((report, idx) => (
+                                            <div key={idx} className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <span className="text-xs font-semibold uppercase px-2 py-1 bg-red-100 text-red-800 rounded">
+                                                        {report.status}
+                                                    </span>
+                                                    <span className="text-xs text-surface-500">User ID: {report.user_id}</span>
+                                                </div>
+                                                <p className="text-surface-800 text-sm font-medium">"{report.reason}"</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </section>
                     </div>
 
@@ -244,6 +266,11 @@ export default function PropertyDetails() {
                                     <div className="flex items-center gap-1 text-green-600 text-sm mt-1 font-medium shadow-sm bg-green-50 px-2 py-0.5 rounded-full inline-flex">
                                         <ShieldCheck className="h-4 w-4" />
                                         Strictly Verified
+                                    </div>
+                                    <div className="flex items-center gap-1 text-surface-600 text-sm mt-2">
+                                        <Star className="h-4 w-4 text-amber-500 fill-current" />
+                                        <span className="font-semibold">{property.agent?.average_rating ? property.agent.average_rating.toFixed(1) : 'New'}</span>
+                                        <span className="text-surface-400">Rating</span>
                                     </div>
                                 </div>
                             </div>

@@ -26,9 +26,35 @@ Our application is built for scalability and performance, following a decoupled 
 - **Frontend:** React.js, Tailwind CSS, Framer Motion
   - *Hosted securely on **Vercel** for fast, global delivery.*
 - **Backend:** Python, FastAPI, SQLAlchemy
-  - *Hosted on **PythonAnywhere** providing a robust API.*
-- **Database:** PostgreSQL (Hosted on **Supabase**)
-- **Media Storage:** **Cloudinary** (For optimized image delivery)
+  - *Hosted on **Vercel** providing a robust Serverless API.*
+- **Database:** PostgreSQL (*Hosted on **Supabase***)
+- **Media Storage:** **Cloudinary** (*For optimized image delivery*)
+
+---
+
+## 🏛️ System Architecture
+
+![h:400 System Architecture Diagram](architecture.svg)
+
+---
+
+## 🗄️ Database Structure
+
+![h:450 Database Schema](db_schema.svg)
+
+*Core tables: Users, Agents, Properties, Property Images, Verification Requests, Ratings & Reports.*
+
+---
+
+## 🔌 API Overview
+
+A comprehensive REST API grouped by entity, secured via JWT tokens:
+
+* **Authentication (`/api/auth`)**: Login, Register, Profile fetching.
+* **Properties (`/api/properties`)**: CRUD operations for property listings.
+* **Agents (`/api/agents`)**: Agent onboarding, verification, and profile views.
+* **Admin (`/api/admin`)**: User/Agent moderation and account suspensions.
+* **Review/Report (`/api/reviews`)**: Agent ratings and platform moderation.
 
 ---
 
@@ -60,9 +86,9 @@ Our application is built for scalability and performance, following a decoupled 
 ## 🚀 Deployment & Production Environment
 
 The application is fully live in production:
-1. **Vercel (Frontend):** Ensures quick load times and seamless updates whenever UI changes are pushed.
-2. **PythonAnywhere (Backend):** Serves our RESTful API endpoints, handling business logic, authentication, and database routing.
-3. **Supabase & Cloudinary:** Handle our persistent data and media without bogging down our main servers.
+1. **Vercel (Frontend & Backend):** Ensures quick load times, seamless updates whenever UI changes are pushed, and reliable serverless API endpoint hosting.
+2. **Supabase:** Handles our robust PostgreSQL database efficiently via connection pooling.
+3. **Cloudinary:** Takes care of our persistent media without bogging down our main servers, delivering tailored image sizes on demand.
 
 ---
 

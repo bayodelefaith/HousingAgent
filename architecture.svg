@@ -1,0 +1,51 @@
+<svg viewBox="0 0 800 400" width="100%" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="400" fill="#f8fafc" rx="10"/>
+  
+  <!-- Client/Frontend -->
+  <g transform="translate(50, 150)">
+    <rect width="180" height="100" fill="#3b82f6" rx="8" />
+    <text x="90" y="40" fill="white" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle">Frontend (React)</text>
+    <text x="90" y="65" fill="#e0f2fe" font-family="Arial" font-size="12" text-anchor="middle">Vite / Tailwind / Vercel</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M 230 200 L 320 200" stroke="#64748b" stroke-width="3" fill="none" marker-end="url(#arrowhead)" />
+  <path d="M 320 190 L 230 190" stroke="#64748b" stroke-width="3" fill="none" marker-end="url(#arrowhead)" />
+
+  <!-- Backend -->
+  <g transform="translate(330, 150)">
+    <rect width="180" height="100" fill="#10b981" rx="8" />
+    <text x="90" y="40" fill="white" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle">Backend API</text>
+    <text x="90" y="65" fill="#d1fae5" font-family="Arial" font-size="12" text-anchor="middle">FastAPI / Vercel</text>
+  </g>
+
+  <!-- Arrow 2 (DB) -->
+  <path d="M 510 180 L 600 130" stroke="#64748b" stroke-width="3" fill="none" marker-end="url(#arrowhead)" />
+  <path d="M 600 120 L 510 170" stroke="#64748b" stroke-width="3" fill="none" marker-end="url(#arrowhead)" />
+
+  <!-- Database -->
+  <g transform="translate(610, 70)">
+    <rect width="160" height="90" fill="#f59e0b" rx="8" />
+    <text x="80" y="40" fill="white" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle">Database</text>
+    <text x="80" y="65" fill="#fef3c7" font-family="Arial" font-size="12" text-anchor="middle">PostgreSQL / Supabase</text>
+  </g>
+
+  <!-- Arrow 3 (Cloudinary) -->
+  <path d="M 510 220 L 600 270" stroke="#64748b" stroke-width="3" fill="none" marker-end="url(#arrowhead)" />
+  <path d="M 600 280 L 510 230" stroke="#64748b" stroke-width="3" fill="none" marker-end="url(#arrowhead)" />
+
+  <!-- Media Storage -->
+  <g transform="translate(610, 240)">
+    <rect width="160" height="90" fill="#8b5cf6" rx="8" />
+    <text x="80" y="40" fill="white" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle">Media Storage</text>
+    <text x="80" y="65" fill="#ede9fe" font-family="Arial" font-size="12" text-anchor="middle">Cloudinary</text>
+  </g>
+
+  <!-- Definitions -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+    </marker>
+  </defs>
+</svg>

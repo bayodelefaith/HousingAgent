@@ -2,6 +2,7 @@ from typing import Optional
 from pydantic import BaseModel
 from datetime import datetime
 from app.schemas.agent import AgentResponse
+from app.schemas.review_and_report import ReportResponse
 
 class PropertyBase(BaseModel):
     title: str
@@ -41,6 +42,7 @@ class PropertyResponse(PropertyBase):
     created_at: datetime
     agent: Optional[AgentResponse] = None
     images: list[PropertyImageResponse] = []
+    reports: list[ReportResponse] = []
 
     class Config:
         from_attributes = True

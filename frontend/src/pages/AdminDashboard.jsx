@@ -69,8 +69,8 @@ export default function AdminDashboard() {
         setActionLoading(`verify-${requestId}`);
         try {
             await api.put(`/admin/verifications/${requestId}/${action}`);
-            // Remove the processed request from the list
-            setVerifications(verifications.filter(v => v.id !== requestId));
+            // Refresh data so both users and verifications lists are up-to-date
+            await fetchData();
         } catch (err) {
             console.error(`Failed to ${action} verification:`, err);
             alert(`Failed to ${action} verification request`);

@@ -5,7 +5,7 @@ import shutil
 import cloudinary
 import cloudinary.uploader
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_
 
 from app.db.database import get_db
@@ -149,7 +149,10 @@ def get_property(
     property_id: int,
     db: Session = Depends(get_db)
 ) -> Any:
-    property_obj = db.query(Property).filter(Property.id == property_id).first()
+    property_obj = db.query(Property).options(
+        joinedload(Property.agent),
+        joinedload(Property.reports)
+    ).filter(Property.id == property_id).first()
     if not property_obj:
         raise HTTPException(status_code=404, detail="Property not found")
     return property_obj
